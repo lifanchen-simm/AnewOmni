@@ -29,16 +29,16 @@ def create_fast_config(mode='dock', loose_th=False):
 
     return config
 
-def denovo_validity(pocket_file, mol_sdf, remove_energy_term=False, loose_th=False):
+def denovo_validity(pocket_file, mol_sdf, remove_energy_term=False, loose_th=False, mode='dock'):
     pred_file = Path(mol_sdf)
     true_file = Path(mol_sdf)
     cond_file = Path(pocket_file)
 
     if remove_energy_term:
-        fast_config = create_fast_config(mode='dock', loose_th=loose_th)
+        fast_config = create_fast_config(mode=mode, loose_th=loose_th)
         buster = PoseBusters(config=fast_config)
     else:
-        buster = PoseBusters(config='dock')
+        buster = PoseBusters(config=mode)
 
     try:
         df = buster.bust([pred_file], true_file, cond_file)

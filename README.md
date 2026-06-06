@@ -124,6 +124,11 @@ By default, the pipeline uses `protenix` as the cofold backend. For CLI argument
 | Binder Modality | Template Class | Configuration | Description |
 |:----|:--|:--|:--|
 | Small Molecule | `Molecule` | `demo/small_molecule.yaml` | The range of number of blocks can be either specified or automatically sampled based on the spatial volume of the binding site. |
+| Molecule Grow | `MoleculeCompletion` | `demo/grow_random.yaml` | Fixes seed scaffold from SDF and randomly grows additional molecular blocks around the binding site. |
+| Molecule Grow (Control) | `MoleculeCompletion` | `demo/grow_control.yaml` | Fixes seed fragments from SDF and performs directed growing by specifying approximate block centers for the added blocks. |
+| Linker | `MoleculeCompletion` | `demo/linker_random.yaml` | Fixes multiple fragments from SDF and completes linker blocks between them. |
+| Linker (Control) | `MoleculeCompletion` | `demo/linker_control.yaml` | Fixes multiple fragments from SDF and performs directed linker completion by specifying approximate block centers for the added blocks. |
+| Covalent Small Molecule | `CovalentMolecule` | `demo/covalent.yaml` | Fixes a covalent fragment, adds an explicit target-ligand covalent bond, and design molecules. |
 | Linear Peptide | `LinearPeptide` | `demo/linear_pep.yaml` | Minimum and maximum of lengths need to be specified. |
 | Disulfide Cyclic Peptide | `DiSulfidePeptide` | `demo/disulfide_cyc_pep.yaml` | Prompting generations with cysteines at head and tail, as well as a disulfide bond between them. |
 | Head-to-Tail Cyclic Peptide | `HeadTailPeptide` | `demo/headtail_cyc_pep.yaml` | Prompting generations with amide bond between head and tail. |
@@ -135,6 +140,19 @@ By default, the pipeline uses `protenix` as the cofold backend. For CLI argument
 `Molecule`:
   - `size_min` (default: `None`): Minimum number of blocks in the generated small molecule.
   - `size_max` (default: `None`): Maximum number of blocks in the generated small molecule.
+
+`MoleculeCompletion`:
+  - `fragment_sdf` (required): SDF file containing the fixed fragments.
+  - `add_block_size_min` / `add_block_size_max` (required): Range of additional generated blocks, with `add_block_size_min` inclusive and `add_block_size_max` exclusive.
+  - `block_centers` (default: `None`): Optional list of approximate 3D centers for added blocks. When provided, the template performs directed growing / directed linking.
+  - `block_center_stds` (default: all `1.0`): Sampling standard deviations for `block_centers`.
+  - `w` (default: `1.0`): Strength of topology/coordinate guidance.
+
+`CovalentMolecule`:
+  - `fragment_sdf` (required): SDF file containing the fixed covalent fragment.
+  - `tgt_connect_atom_label` (required): Target atom label as `[chain_id, residue_number, insertion_code, atom_name]`, for example `[A, 145, '', SG]`.
+  - `fragment_connect_atom_label` (required): Atom on the fixed fragment that forms the covalent bond, defined as 1-based atom index from the SDF file (e.g. `2`).
+  - `tgt_connect_bond_level` (default: `1`): Bond order of the target-ligand covalent bond (`1` single, `2` double, `3` triple).
 
 `LinearPeptide`:
   - `size_min` ($\geq 4$, default: 8): Minimum number of residues in the generated peptide, inclusive of this value.

@@ -97,3 +97,29 @@ def _avoid_clash(A, X_t, batch_ids, block_ids, chain_ids, generate_mask, is_aa=N
     X_t = X_t + force
 
     return X_t
+
+
+@torch.no_grad()
+def _approach_covalent_bonds(X_t, block_ids, chain_ids, generate_mask, bonds, bond_dist=1.8):
+    if bonds is None or bonds.numel() == 0:
+        return X_t
+
+    row, col = bonds[:, 0], bonds[:, 1]
+    select_mask = (
+        generate_mask[block_ids[row]] &
+        (~generate_mask[block_ids[col]]) &
+        (chain_ids[block_ids[row]] != chain_ids[block_ids[col]])
+    )
+    row, col = row[select_mask], col[select_mask]
+    if row.numel() == 0:
+        return X_t
+
+
+    relative_x = X_t[col] - X_t[row]
+    distances = torch.norm(relative_x, dim=-1)
+    target_dist = torch.full_like(distances, fill_value=bond_dist)
+    attraction = torch.clamp(distances - target_dist, min=0.0)
+    force = relative_x / (distances[:, None] + 1e-10) * attraction[:, None]
+    force = scatter_sum(force, row, dim=0, dim_size=X_t.shape[0])
+
+    return X_t + force
