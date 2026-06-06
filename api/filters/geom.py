@@ -51,6 +51,10 @@ class ConfidenceThresholdFilter(BaseFilter):
 @R.register('PhysicalValidityFilter')
 class PhysicalValidityFilter(BaseFilter):
 
+    def __init__(self, skip_clash=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.skip_clash = skip_clash
+
     @ray.remote(num_cpus=1)
     def run(self, input: FilterInput):
         # save new pockets (generated ligand might clash with unseen parts)
@@ -74,7 +78,10 @@ class PhysicalValidityFilter(BaseFilter):
             # Write the molecule to the temporary SDF file
             with Chem.SDWriter(temp_filename) as writer:
                 writer.write(mol)
-            validity, details = denovo_validity(pocket_pdb, temp_filename, remove_energy_term=True, loose_th=True)
+            validity, details = denovo_validity(
+                pocket_pdb, temp_filename, remove_energy_term=True, loose_th=True,
+                mode='mol' if self.skip_clash else 'dock'
+            )
             assert len(validity) == 1
             os.remove(temp_filename)
             if not validity[0]: return FilterResult.FAILED, details

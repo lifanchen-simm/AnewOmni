@@ -16,7 +16,7 @@ import utils.register as R
 from utils.oom_decorator import oom_decorator
 
 from .map import block_to_atom_map
-from .tools import _avoid_clash
+from .tools import _avoid_clash, _approach_covalent_bonds
 
 from ..modules.GET.tools import fully_connect_edges, knn_edges
 from ..modules.nn import BlockEmbedding, MLP
@@ -866,6 +866,7 @@ class CondIterAutoEncoderEdge(nn.Module):
             X_t = X_t + pred_vector * span # update
             if not disable_avoid_clash:
                 X_t = _avoid_clash(A, X_t, batch_ids, block_ids, chain_ids, generate_mask, is_aa)
+            X_t = _approach_covalent_bonds(X_t, block_ids, chain_ids, generate_mask, bonds)
             all_vectors.append(pred_vector)
 
         X = X_t

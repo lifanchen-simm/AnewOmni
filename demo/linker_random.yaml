@@ -1,0 +1,18 @@
+dataset:
+  pdb_paths:
+    - ./demo/data/mol_grow/cplx.cif
+  tgt_chains:
+    - AB
+  lig_chains:
+    - L
+
+templates:
+  # molecule linker
+  - class: MoleculeCompletion
+    fragment_sdf: ./demo/data/mol_grow/cleaned_fragments.sdf
+    add_block_size_min: 4
+    add_block_size_max: 8  # [4, 10)
+
+
+batch_size: 16
+n_samples: 50  # top-50 candidates for each complex

@@ -1,0 +1,17 @@
+dataset:
+  pdb_paths:
+    - ./demo/data/covalent/target.cif
+  tgt_chains:
+    - A
+  hotspots:
+    - [[A, 145, ''], [A, 140, ''], [A, 166, ''], [A, 189, ''], [A, 41, '']]
+
+templates:
+  - class: CovalentMolecule
+    fragment_sdf: ./demo/data/covalent/fragment_ccn.sdf
+    tgt_connect_atom_label: [A, 145, '', SG]
+    fragment_connect_atom_label: 2   # 1-based SDF atom index of C in fragment_ccn.sdf
+    tgt_connect_bond_level: 1
+
+batch_size: 16
+n_samples: 50
